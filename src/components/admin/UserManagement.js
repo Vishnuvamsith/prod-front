@@ -18,36 +18,23 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      // Commented actual API call
-      // const response = await fetch('http://localhost:8083/api/Users/allUsers', {
-      //   headers: { 'Authorization': `Bearer ${token}` }
-      // });
-      // const data = await response.json();
-      
-      // Mock data
-      const mockUsers = [
-        {
-          email: 'admin@bofa.com',
-          id: '1',
-          password: 'encrypted',
-          role: 'ADMIN'
-        },
-        {
-          email: 'prod@bofa.com',
-          id: '2',
-          password: 'encrypted',
-          role: 'PROD_SUPP'
-        },
-        {
-          email: 'user@bofa.com',
-          id: '3',
-          password: 'encrypted',
-          role: 'USER'
+      const response = await fetch('http://localhost:8083/api/Users/allUsers', {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      ];
-      setUsers(mockUsers);
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch users');
+      
+      const data = await response.json();
+      console.log('Users data:', data); // Debug log
+      
+      // ✅ Since it's a direct array, we can set it directly
+      setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
+      setUsers([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -56,21 +43,24 @@ const UserManagement = () => {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      // Commented actual API call
-      // const response = await fetch('http://localhost:8083/api/Users/add', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${token}`
-      //   },
-      //   body: JSON.stringify(newUser)
-      // });
+      const response = await fetch('http://localhost:8083/api/Users/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newUser)
+      });
       
-      // Mock success
-      alert('User created successfully!');
-      setNewUser({ email: '', password: '', role: 'USER' });
-      setShowAddForm(false);
-      fetchUsers();
+      if (response.ok) {
+        const result = await response.text();
+        alert('User created successfully!');
+        setNewUser({ email: '', password: '', role: 'USER' });
+        setShowAddForm(false);
+        fetchUsers(); // Refresh the list
+      } else {
+        throw new Error('Failed to add user');
+      }
     } catch (error) {
       console.error('Failed to add user:', error);
       alert('Failed to add user');
@@ -102,6 +92,7 @@ const UserManagement = () => {
                 value={newUser.email}
                 onChange={(e) => setNewUser({...newUser, email: e.target.value})}
                 required
+                placeholder="Enter email address"
               />
             </div>
             <div className="form-group">
@@ -111,6 +102,7 @@ const UserManagement = () => {
                 value={newUser.password}
                 onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                 required
+                placeholder="Enter password"
               />
             </div>
             <div className="form-group">
@@ -125,8 +117,8 @@ const UserManagement = () => {
               </select>
             </div>
             <div className="form-actions">
-              <button type="submit">Create User</button>
-              <button type="button" onClick={() => setShowAddForm(false)}>
+              <button type="submit" className="btn-primary">Create User</button>
+              <button type="button" className="btn-secondary" onClick={() => setShowAddForm(false)}>
                 Cancel
               </button>
             </div>
@@ -155,6 +147,13 @@ const UserManagement = () => {
                 <td>{user.id}</td>
               </tr>
             ))}
+            {users.length === 0 && (
+              <tr>
+                <td colSpan="3" style={{ textAlign: 'center', padding: '2rem', color: '#7f8c8d' }}>
+                  No users found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
