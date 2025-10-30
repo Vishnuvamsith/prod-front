@@ -1,13 +1,12 @@
-// src/components/user/CreateTicket.js
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
-const CreateTicket = ({ onTicketCreated, setActiveTab }) => { // Added setActiveTab prop
+const CreateTicket = ({ onTicketCreated, setActiveTab }) => {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
     IncidentType: '',
     TeamName: '',
-    DefectCategory: '',
+    DefectCataegory: '', // ✅ CORRECT SPELLING
     Description: '',
     IncidentSeverity: '',
     applicationName: '',
@@ -20,31 +19,33 @@ const CreateTicket = ({ onTicketCreated, setActiveTab }) => { // Added setActive
     setSubmitting(true);
 
     try {
-      // Mock submission
-      console.log('Ticket created:', formData);
-      alert('Ticket created successfully!');
-      
-      // Reset form
-      setFormData({
-        IncidentType: '',
-        TeamName: '',
-        DefectCategory: '',
-        Description: '',
-        IncidentSeverity: '',
-        applicationName: '',
-        IssueFrom: ''
+      const response = await fetch('http://localhost:8083/ticket/createTicket', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
       });
-      
-      // Call the callback to refresh tickets
-      if (onTicketCreated) {
-        onTicketCreated();
+
+      if (response.ok) {
+        alert('Ticket created successfully!');
+        
+        setFormData({
+          IncidentType: '',
+          TeamName: '',
+          DefectCataegory: '', // ✅ CORRECT SPELLING
+          Description: '',
+          IncidentSeverity: '',
+          applicationName: '',
+          IssueFrom: ''
+        });
+        
+        if (onTicketCreated) onTicketCreated();
+        if (setActiveTab) setActiveTab('home');
+      } else {
+        throw new Error('Failed to create ticket');
       }
-      
-      // AUTO-REDIRECT TO HOME PAGE
-      if (setActiveTab) {
-        setActiveTab('home');
-      }
-      
     } catch (error) {
       console.error('Failed to create ticket:', error);
       alert('Failed to create ticket');
@@ -64,7 +65,7 @@ const CreateTicket = ({ onTicketCreated, setActiveTab }) => { // Added setActive
     setFormData({
       IncidentType: '',
       TeamName: '',
-      DefectCategory: '',
+      DefectCataegory: '', // ✅ CORRECT SPELLING
       Description: '',
       IncidentSeverity: '',
       applicationName: '',
@@ -111,8 +112,8 @@ const CreateTicket = ({ onTicketCreated, setActiveTab }) => { // Added setActive
           <div className="form-group">
             <label>Defect Category *</label>
             <select 
-              name="DefectCategory" 
-              value={formData.DefectCategory}
+              name="DefectCataegory" // ✅ CORRECT SPELLING
+              value={formData.DefectCataegory}
               onChange={handleChange}
               required
             >
